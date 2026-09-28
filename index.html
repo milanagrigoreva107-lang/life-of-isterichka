@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f8d7e3">
+<title>Жизнь истерички</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Истеричка">
+</head>
+<body>
+
+<header class="app-header">
+<h1 id="header-title">Жизнь истерички</h1>
+</header>
+<!-- Баннер напоминаний -->
+  <div class="reminder-banner" id="reminder-banner" style="display:none;"></div>
+<main class="app-content">
+
+<!-- ЭКРАН 1: РАСПИСАНИЕ -->
+<section class="screen active" id="screen-schedule">
+
+<div class="today-card" id="today-card">
+<div class="today-title">Сегодня</div>
+<div class="today-content" id="today-content"></div>
+</div>
+
+<div class="week-nav">
+<button class="week-btn" id="btn-prev-week" aria-label="Прошлая неделя">←</button>
+<div class="week-title">
+<div class="week-month" id="week-month">—</div>
+<div class="week-sub" id="week-sub">—</div>
+</div>
+<button class="week-btn" id="btn-next-week" aria-label="Следующая неделя">→</button>
+</div>
+
+<div class="week-actions">
+        <button class="btn-today" id="btn-today">Сегодня</button>
+        <button class="btn-today" id="btn-calendar">📅 Календарь</button>
+      </div>
+
+<div class="days-list" id="days-list"></div>
+
+<!-- Модальное окно расписания -->
+<div class="modal-overlay" id="modal">
+<div class="modal-card">
+<div class="modal-header">
+<div class="modal-title" id="modal-title">Новая запись</div>
+<button class="modal-close" id="modal-close">✕</button>
+</div>
+
+<div class="modal-field" id="field-time" style="display:none;">
+<label class="modal-label">Время</label>
+<input type="text" class="modal-input" id="input-time">
+</div>
+
+<div class="modal-field">
+<label class="modal-label" id="label-text">Что сделать?</label>
+<textarea class="modal-textarea" id="input-text" placeholder="" rows="3"></textarea>
+</div>
+
+<div class="modal-actions">
+<button class="btn-cancel" id="modal-cancel">Отмена</button>
+<button class="btn-save" id="modal-save">Сохранить</button>
+</div>
+</div>
+</div>
+<!-- Модальное окно: Календарь -->
+      <div class="modal-overlay" id="calendar-modal">
+        <div class="modal-card calendar-card">
+          <div class="modal-header">
+            <div class="modal-title">Календарь</div>
+            <button class="modal-close" id="calendar-modal-close">✕</button>
+          </div>
+
+          <div class="calendar-month">
+            <button class="cal-nav-btn" id="cal-prev">←</button>
+            <div class="calendar-month-label" id="cal-month-label">—</div>
+            <button class="cal-nav-btn" id="cal-next">→</button>
+          </div>
+
+          <div class="calendar-weekdays">
+            <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span>
+            <span>Пт</span><span>Сб</span><span>Вс</span>
+          </div>
+
+          <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+      </div>
+</section>
+
+<!-- ЭКРАН 2: ЗАДАЧИ -->
+<section class="screen" id="screen-tasks">
+
+<button class="add-task-btn" id="btn-add-task">
+  <span>+ новая задача</span>
+</button>
+
+<div class="overdue-block" id="overdue-block" style="display:none;"></div>
+<!-- Блок "Долги из финансов" (заполняется JS) -->
+  <div class="debts-in-tasks" id="debts-in-tasks"></div>
+
+<div class="all-good-block" id="all-good-block">
+  🌸 Ты умничка, всё успеваешь
+</div>
+
+<div class="tasks-list" id="tasks-list"></div>
+<!-- Модальное окно новой задачи -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="task-modal-title">Новая задача</div>
+        <button class="modal-close" id="task-modal-close">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Что сделать?</label>
+        <textarea class="modal-textarea" id="task-input-text" rows="3"></textarea>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">До какого числа? (необязательно)</label>
+        <input type="date" class="modal-input" id="task-input-date">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="task-modal-cancel">Отмена</button>
+        <button class="btn-save" id="task-modal-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ЭКРАН 3: ФИНАНСЫ -->
+<section class="screen" id="screen-finance">
+
+  <!-- Сводка за месяц -->
+  <div class="finance-summary" id="finance-summary">
+    <div class="summary-title">За этот месяц</div>
+    <div class="summary-total" id="summary-total">0 ₽</div>
+    <div class="summary-categories" id="summary-categories"></div>
+    <div class="summary-cards" id="summary-cards"></div>
+  </div>
+
+  <!-- Блок "Кредиты" -->
+  <div class="finance-block">
+    <div class="finance-block-header">
+      <span class="finance-block-title">💳 Кредиты</span>
+      <button class="finance-add-btn" id="btn-add-card">+</button>
+    </div>
+    <div class="cards-list" id="cards-list"></div>
+  </div>
+
+  <!-- Блок "Крупные траты" -->
+      <div class="finance-block">
+        <div class="finance-block-header">
+          <span class="finance-block-title">📌 Крупные траты</span>
+          <button class="finance-add-btn" id="btn-add-debt">+</button>
+        </div>
+        <div class="debts-list" id="debts-list"></div>
+      </div>
+
+  <!-- Блок "Быстрые траты" -->
+      <div class="finance-block">
+        <div class="finance-block-header">
+          <span class="finance-block-title">💸 Быстрые траты</span>
+          <button class="finance-add-btn" id="btn-add-category">+</button>
+        </div>
+        <div class="categories-grid" id="categories-grid"></div>
+      </div>
+<!-- Блок "Доходы" -->
+  <div class="finance-block">
+    <div class="finance-block-header">
+      <span class="finance-block-title">💰 Доходы</span>
+      <button class="finance-add-btn" id="btn-add-income-category">+</button>
+    </div>
+    <div class="categories-grid" id="incomes-grid"></div>
+  </div>
+
+  <!-- Блок "Базовые покупки" -->
+  <div class="finance-block">
+    <div class="finance-block-header">
+      <span class="finance-block-title">🛒 Базовые покупки</span>
+      <button class="finance-add-btn" id="btn-add-basic-shop">+</button>
+    </div>
+    <div class="shops-list" id="basic-shops-list"></div>
+  </div>
+
+  <!-- Блок "Большие покупки" -->
+  <div class="finance-block">
+    <div class="finance-block-header">
+      <span class="finance-block-title">🎁 Большие покупки</span>
+      <button class="finance-add-btn" id="btn-add-big-shop">+</button>
+    </div>
+    <div class="shops-list" id="big-shops-list"></div>
+  </div>
+
+  <!-- Модальное окно: Кредитка -->
+  <div class="modal-overlay" id="card-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="card-modal-title">Новая кредитка</div>
+        <button class="modal-close" id="card-modal-close">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Название</label>
+        <input type="text" class="modal-input" id="card-input-name">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Осталось выплатить, ₽</label>
+        <input type="number" class="modal-input" id="card-input-total" >
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Ежемесячный платёж, ₽</label>
+        <input type="number" class="modal-input" id="card-input-monthly" >
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Дата платежа (число месяца)</label>
+        <input type="number" class="modal-input" id="card-input-day" min="1" max="31">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="card-modal-cancel">Отмена</button>
+        <button class="btn-save" id="card-modal-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Долг -->
+  <div class="modal-overlay" id="debt-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="debt-modal-title">Новый долг</div>
+        <button class="modal-close" id="debt-modal-close">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Что отдать / кому</label>
+        <input type="text" class="modal-input" id="debt-input-text">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Сумма, ₽</label>
+        <input type="number" class="modal-input" id="debt-input-amount" placeholder="3000">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">До какого числа</label>
+        <input type="date" class="modal-input" id="debt-input-date">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="debt-modal-cancel">Отмена</button>
+        <button class="btn-save" id="debt-modal-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Быстрая трата -->
+  <div class="modal-overlay" id="expense-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="expense-modal-title">Трата</div>
+        <button class="modal-close" id="expense-modal-close">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label
+
+
+="modal-label">Сумма, ₽</label>
+        <input type="number" class="modal-input" id="expense-input-amount" placeholder="500">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Комментарий (необязательно)</label>
+        <input type="text" class="modal-input" id="expense-input-comment" placeholder="">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="expense-modal-cancel">Отмена</button>
+        <button class="btn-save" id="expense-modal-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно: Своя категория -->
+  <div class="modal-overlay" id="category-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Новая категория</div>
+        <button class="modal-close" id="category-modal-close">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Название категории</label>
+        <input type="text" class="modal-input" id="category-input-name">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="category-modal-cancel">Отмена</button>
+        <button class="btn-save" id="category-modal-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+<!-- Модальное окно: Покупка -->
+  <div class="modal-overlay" id="shop-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="shop-modal-title">Новая покупка</div>
+        <button class="modal-close" id="shop-modal-close">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Что купить</label>
+        <input type="text" class="modal-input" id="shop-input-name">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Примерная цена, ₽</label>
+        <input type="number" class="modal-input" id="shop-input-price">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="shop-modal-cancel">Отмена</button>
+        <button class="btn-save" id="shop-modal-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</section> 
+
+<!-- ЭКРАН 4: ССЫЛКИ -->
+<section class="screen" id="screen-links">
+
+  <button class="add-task-btn" id="btn-add-link">
+    <span>+ новая ссылка</span>
+  </button>
+
+  <div class="links-list" id="links-list"></div>
+
+  <!-- Модальное окно ссылки -->
+  <div class="modal-overlay" id="link-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="link-modal-title">Новая ссылка</div>
+        <button class="modal-close" id="link-modal-close">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Название</label>
+        <input type="text" class="modal-input" id="link-input-name">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Ссылка</label>
+        <input type="url" class="modal-input" id="link-input-url">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Описание</label>
+        <input type="text" class="modal-input" id="link-input-desc">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Категория</label>
+        <select class="modal-input" id="link-input-category">
+          <option value="work">💼 Работа</option>
+          <option value="study">📚 Учёба</option>
+          <option value="clients">👥 У клиентов</option>
+          <option value="personal">🌸 Личное</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="link-modal-cancel">Отмена</button>
+        <button class="btn-save" id="link-modal-save">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+<!-- ЭКРАН 5: ПЛАНЫ -->
+    <section class="screen" id="screen-plans">
+
+      <button class="add-task-btn" id="btn-add-plan">
+        <span>+ новый план</span>
+      </button>
+
+      <div class="plans-list" id="plans-list"></div>
+
+      <!-- Модальное окно плана -->
+      <div class="modal-overlay" id="plan-modal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title" id="plan-modal-title">Новый план</div>
+            <button class="modal-close" id="plan-modal-close">✕</button>
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Название плана</label>
+            <input type="text" class="modal-input" id="plan-input-name">
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Период</label>
+            <select class="modal-input" id="plan-input-period-type">
+              <option value="week">Неделя</option>
+              <option value="month" selected>Месяц</option>
+              <option value="year">Год</option>
+            </select>
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Когда</label>
+            <input type="date" class="modal-input" id="plan-input-date">
+            <div class="modal-hint" id="plan-date-hint">Выбери любую дату из периода</div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-cancel" id="plan-modal-cancel">Отмена</button>
+            <button class="btn-save" id="plan-modal-save">Сохранить</button>
+          </div>
+        </div>
+      </div>
+<!-- Модальное окно задачи плана -->
+      <div class="modal-overlay" id="plan-task-modal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div class="modal-title">Новая задача</div>
+            <button class="modal-close" id="plan-task-modal-close">✕</button>
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Что сделать?</label>
+            <input type="text" class="modal-input" id="plan-task-input-text">
+          </div>
+
+          <div class="modal-field">
+            <label class="modal-label">Тип</label>
+            <select class="modal-input" id="plan-task-input-type">
+              <option value="task">✅ Дело — попадёт в Задачи</option>
+              <option value="money">💰 Трата — попадёт в Финансы</option>
+            </select>
+          </div>
+
+          <div class="modal-field" id="plan-task-price-field" style="display:none;">
+            <label class="modal-label">Сумма, ₽</label>
+            <input type="number" class="modal-input" id="plan-task-input-price">
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-cancel" id="plan-task-modal-cancel">Отмена</button>
+            <button class="btn-save" id="plan-task-modal-save">Сохранить</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+</main>
+
+<nav class="app-nav">
+<button class="nav-btn active" data-screen="schedule">
+<span class="nav-icon">📅</span>
+<span class="nav-label">Расписание</span>
+</button>
+<button class="nav-btn" data-screen="tasks">
+<span class="nav-icon">✅</span>
+<span class="nav-label">Задачи</span>
+</button>
+<button class="nav-btn" data-screen="finance">
+<span class="nav-icon">💰</span>
+<span class="nav-label">Финансы</span>
+</button>
+<button class="nav-btn" data-screen="links">
+<span class="nav-icon">🔗</span>
+<span class="nav-label">Ссылки</span>
+</button>
+<button class="nav-btn" data-screen="plans">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Планы</span>
+    </button>
+</nav>
+<!-- Универсальное окно подтверждения -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal-card confirm-card">
+      <div class="confirm-title" id="confirm-title">Подтверждение</div>
+      <div class="confirm-text" id="confirm-text"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="confirm-cancel">Отмена</button>
+        <button class="btn-save" id="confirm-ok">ОК</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Универсальное окно уведомления -->
+  <div class="modal-overlay" id="alert-modal">
+    <div class="modal-card confirm-card">
+      <div class="confirm-title" id="alert-title">Уведомление</div>
+      <div class="confirm-text" id="alert-text"></div>
+      <div class="modal-actions">
+        <button class="btn-save" id="alert-ok">ОК</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+
+</body>
+</html>

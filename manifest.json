@@ -1,0 +1,18 @@
+{
+  "name": "Жизнь истерички",
+  "short_name": "Истеричка",
+  "description": "Личный ежедневник: расписание, задачи, финансы, планы",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fdeef4",
+  "theme_color": "#f8d7e3",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
